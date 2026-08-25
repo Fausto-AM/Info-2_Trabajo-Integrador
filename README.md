@@ -12,3 +12,6 @@ El objetivo de este proyecto consiste en el diseño y la implementación de un g
 
 ### Objetivos
 
+### Diagrama de la Máquina de Estado
+
+![Diagrama de la Máquina de Estado]()
