@@ -18,4 +18,4 @@ El objetivo de este proyecto consiste en el diseño y la implementación de un g
 
 ### Diagrama de la Máquina de Estado
 
-![Diagrama de la Máquina de Estado]()
+![Diagrama de la Máquina de Estado](https://github.com/Fausto-AM/Info-2_Trabajo-Integrador/blob/main/Assets/Dia_Maq_Est.svg)
