@@ -2,7 +2,7 @@
 
 Repositorio personal para la entrega del Trabajo Práctico Integrador de Informática II para la UTNFRA.
 
-## Profesores:
+## Profesores
 - Ing. Gustavo Viard.
 - Mg. Ing. Damian Ruben Corbalan.
 
@@ -24,8 +24,8 @@ El objetivo de este proyecto consiste en el diseño y la implementación de un g
 
 ### Esquemático
 
-![Esquemático](Assets/)
+![Esquemático](Assets/Esquematico)
 
 ### PCB Finalizado
 
-![PCB](Assets/)
+![PCB](Assets/PCB)
