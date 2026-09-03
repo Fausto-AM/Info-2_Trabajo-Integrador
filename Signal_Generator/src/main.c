@@ -1,0 +1,10 @@
+#include "config.h"
+
+int main(){
+
+    while(1){
+        printf("Hello World.");
+    }
+    return 0;
+
+}
