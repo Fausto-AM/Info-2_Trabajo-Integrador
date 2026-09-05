@@ -24,7 +24,7 @@ El objetivo de este proyecto consiste en el diseño y la implementación de un g
 
 ### Esquemático
 
-![Esquemático](Assets/Sch_v01.pdf)
+![Esquemático](Assets/Sch_v01.svg)
 
 ### PCB Finalizado
 
