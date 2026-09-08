@@ -13,7 +13,7 @@ typedef enum {
 } state_t;
 
 typedef struct {
-    const char* name;
+    char* name;
     float* value;
     float min, max, step;
     void (*setter)(float);
@@ -36,7 +36,7 @@ void act_start(void);
 void act_stop(void);
 void act_inc_param(void);
 void act_dec_param(void);
-void act_int_func(void);
+void act_inc_func(void);
 void act_dec_func(void);
 void act_select_param(void);
 void act_select_func(void);

@@ -1,8 +1,5 @@
 #include "config.h"
-#include "encoder.h"
-#include "generator.h"
-#include "display.h"
-#include "dac.h"
+#include "sys.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_task_wdt.h"
@@ -10,10 +7,7 @@
 void app_main(void) {
     esp_task_wdt_deinit();
 
-    encoder_init();
-    display_init();
-    generator_init();
-    dac_init();
+    init_all();
 
     while (1) {
         generator_process_event(encoder_get_event());
