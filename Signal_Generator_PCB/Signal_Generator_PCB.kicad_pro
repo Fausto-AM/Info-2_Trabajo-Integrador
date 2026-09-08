@@ -39,9 +39,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 2.2,
-          "height": 2.6,
-          "width": 2.6
+          "drill": 1.0,
+          "height": 1.7,
+          "width": 1.7
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -237,7 +237,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": "v01"
+      "sch_revision": "v02"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -525,7 +525,7 @@
       "specctra_dsn": "",
       "vrml": ""
     },
-    "page_layout_descr_file": ""
+    "page_layout_descr_file": "kicad-embed://UTN_Temp.kicad_wks"
   },
   "schematic": {
     "annotate_start_num": 0,
@@ -645,7 +645,7 @@
         "uuid": "2d5dadf0-2d60-45e8-82fe-e1f536d93e17"
       }
     ],
-    "used_designators": "U1,SW1,R1-3,J1-2,#PWR1-13",
+    "used_designators": "#PWR1,#PWR3,#PWR6-8,#PWR14-16,J3",
     "variants": []
   },
   "sheets": [
