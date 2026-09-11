@@ -47,7 +47,7 @@ Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`ge
 | `waveform.c` / `.h` | Contiene las LUTs (_Look-up Tables_) para seno/cuadrada/triangular y el acumulador de fase; `waveform_get_sample()` se llama una vez por cada muestra de salida. |
 | `dac.c` / `.h` | Un _wrapper_ sobre el driver `dac_oneshot` de ESP-IDF. |
 | `sample_timer.c` / `.h` | Un callback periódico de `esp_timer` a `SAMPLE_RATE` (10kHz) que obtiene una muestra de `waveform.c` y la envía a `dac.c`, habilitado según `generator_is_running()`. |
-| `sys.c` / `.h` | `init_all()` — inicializa todos los módulos en orden. También define `system_process()`, que actualmente está **sin utilizar** (ver más abajo). |
+| `sys.c` / `.h` | `init_all()` — inicializa todos los módulos en orden. |
 | `config.h` | Todos los números de GPIO, los límites eléctricos (frecuencia mínima/máxima, amplitud, etc.) y las dos constantes de antirrebote. |
 
 ### Diagrama de la Máquina de Estado
