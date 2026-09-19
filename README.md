@@ -56,7 +56,7 @@ Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`ge
 
 ### Esquemático
 
-![Esquemático](Assets/Sch_v02.svg)
+![Esquemático](Assets/Sch_v03.svg)
 
 ### PCB Finalizado
 
