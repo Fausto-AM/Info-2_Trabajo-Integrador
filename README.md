@@ -52,7 +52,7 @@ Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`ge
 
 ### Diagrama de la Máquina de Estado
 
-![Diagrama de la Máquina de Estado](Assets/Diag_Maq_Est.svg)
+![Diagrama de la Máquina de Estado](Assets/Dia_Maq_Est.svg)
 
 ### Esquemático
 
