@@ -20,7 +20,7 @@
 
 // Waveform generation parameters
 #define LUT_SIZE      256
-#define SAMPLE_RATE   10000.0f
+#define SAMPLE_RATE   40000.0f
 #define BASE_FREQ     1000.0f
 #define BASE_AMP_VPP  1.65f
 #define BASE_OFFSET   0.0f
