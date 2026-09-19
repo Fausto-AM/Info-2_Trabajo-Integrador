@@ -8,7 +8,7 @@ static const char *TAG = "ENCODER";
 
 static volatile int enc_count = 0;
 
-static volatile int64_t last_edge_us = 0;
+static volatile uint8_t last_ab_state = 0;
 
 static int last_count = 0;
 
@@ -18,27 +18,27 @@ static uint64_t btn_press_start = 0;
 static int btn_pressed = 0;
 static int raw_pressed_prev = 0;
 static uint64_t raw_change_ms = 0;
+static const int8_t qdec_table[16] = {
+     0, -1,  1,  0,
+     1,  0,  0, -1,
+    -1,  0,  0,  1,
+     0,  1, -1,  0
+};
 
 void IRAM_ATTR encoder_isr(void *arg)
 {
     (void)arg;
 
-    int64_t now_us = esp_timer_get_time();
+    uint8_t a = (uint8_t)gpio_get_level(PIN_ENC_A);
+    uint8_t b = (uint8_t)gpio_get_level(PIN_ENC_B);
 
-    if ((now_us - last_edge_us) < ENCODER_DEBOUNCE_US) {
-        return;
-    }
+    uint8_t new_state = (a << 1) | b;
 
-    last_edge_us = now_us;
+    uint8_t index = (last_ab_state << 2) | new_state;
 
-    if (gpio_get_level(PIN_ENC_B)) {
+    enc_count += qdec_table[index];
 
-        enc_count++;
-
-    } else {
-
-        enc_count--;
-    }
+    last_ab_state = new_state;
 }
 
 
@@ -96,6 +96,13 @@ void encoder_init(void)
         )
     );
 
+    ESP_ERROR_CHECK(
+        gpio_set_intr_type(
+            PIN_ENC_B,
+            GPIO_INTR_ANYEDGE
+        )
+    );
+
 
     ESP_ERROR_CHECK(
         gpio_install_isr_service(0)
@@ -109,6 +116,18 @@ void encoder_init(void)
             NULL
         )
     );
+
+    ESP_ERROR_CHECK(
+        gpio_isr_handler_add(
+            PIN_ENC_B,
+            encoder_isr,
+            NULL
+        )
+    );
+
+    last_ab_state =
+        ((uint8_t)gpio_get_level(PIN_ENC_A) << 1) |
+        (uint8_t)gpio_get_level(PIN_ENC_B);
 
     ESP_LOGI(TAG, "Encoder initialized (A=%d B=%d BTN=%d)",
              PIN_ENC_A, PIN_ENC_B, PIN_ENC_BTTN);
@@ -166,21 +185,21 @@ encoder_t encoder_get_event(void)
         return event;
     }
 
-    if (enc_count != last_count) {
+    if (enc_count - last_count >= ENCODER_STEPS_PER_DETENT) {
 
-        if (enc_count > last_count) {
+        event = ENC_CW;
 
-            event = ENC_CW;
+        last_count += ENCODER_STEPS_PER_DETENT;
 
-        } else {
+        ESP_LOGD(TAG, "Rotation event: CW (count=%d)", enc_count);
 
-            event = ENC_CCW;
-        }
+    } else if (enc_count - last_count <= -ENCODER_STEPS_PER_DETENT) {
 
-        ESP_LOGD(TAG, "Rotation event: %s (count=%d)",
-                 (event == ENC_CW) ? "CW" : "CCW", enc_count);
+        event = ENC_CCW;
 
-        last_count = enc_count;
+        last_count -= ENCODER_STEPS_PER_DETENT;
+
+        ESP_LOGD(TAG, "Rotation event: CCW (count=%d)", enc_count);
     }
 
 

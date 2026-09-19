@@ -13,8 +13,8 @@ void display_update(
     float freq,
     float amp,
     float offset,
-    float duty
+    float duty,
+    int wave_type
 );
-
 
 #endif

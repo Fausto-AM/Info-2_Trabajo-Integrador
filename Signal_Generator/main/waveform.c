@@ -1,6 +1,9 @@
 #include "waveform.h"
 
 #include <math.h>
+#include "esp_log.h"
+
+static const char *TAG = "WAVEFORM";
 
 
 static float lut[LUT_SIZE];
@@ -17,6 +20,15 @@ float duty = BASE_DUTY;
 
 static uint32_t phase_acc = 0;
 static uint32_t phase_inc = 0;
+
+static const char *wave_names[] = {
+
+    "Seno",
+    "Cuadrada",
+    "Triangular",
+    "Sierra"
+
+};
 
 
 void gen_sine(void)
@@ -89,12 +101,25 @@ void gen_triangle(void)
     }
 }
 
+void gen_sawtooth(void)
+{
+    for (int i = 0; i < LUT_SIZE; i++) {
+
+        lut[i] =
+            (2.0f *
+             (float)i /
+             (float)LUT_SIZE)
+            - 1.0f;
+    }
+}
+
 
 static void (*gen_funcs[])(void) = {
 
     gen_sine,
     gen_square,
-    gen_triangle
+    gen_triangle,
+    gen_sawtooth
 
 };
 
@@ -111,12 +136,16 @@ void waveform_init(void)
             (freq / SAMPLE_RATE) *
             PHASE_SCALE
         );
+
+    ESP_LOGI(TAG,
+             "Waveform initialized: type=%d freq=%.1f amp=%.2f offset=%.2f duty=%.2f",
+             type, freq, amp, offset, duty);
 }
 
 
 void waveform_set_type(wave_t t)
 {
-    if (t > WAVE_TRIANGLE) {
+    if (t > WAVE_SAWTOOTH) {
         return;
     }
 
@@ -219,4 +248,20 @@ float waveform_get_sample(void)
     return
         (lut[index] * (amp / 2.0f))
         + offset;
+}
+
+
+wave_t waveform_get_type(void)
+{
+    return type;
+}
+
+
+const char *waveform_get_name(wave_t t)
+{
+    if (t > WAVE_SAWTOOTH) {
+        return "?";
+    }
+
+    return wave_names[t];
 }

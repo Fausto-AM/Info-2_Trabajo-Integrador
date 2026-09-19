@@ -8,7 +8,6 @@ idf_component_register(
         "dac.c"
         "sample_timer.c"
         "sys.c"
-        "sample_timer.c"
 
     INCLUDE_DIRS "."
 

@@ -12,7 +12,8 @@ typedef enum {
 
     WAVE_SINE,
     WAVE_SQUARE,
-    WAVE_TRIANGLE
+    WAVE_TRIANGLE,
+    WAVE_SAWTOOTH
 
 } wave_t;
 
@@ -26,6 +27,7 @@ extern float duty;
 void gen_sine(void);
 void gen_square(void);
 void gen_triangle(void);
+void gen_sawtooth(void);
 
 void waveform_init(void);
 
@@ -37,6 +39,10 @@ void waveform_set_offset(float o);
 void waveform_set_duty(float d);
 
 float waveform_get_sample(void);
+
+wave_t waveform_get_type(void);
+
+const char *waveform_get_name(wave_t type);
 
 
 #endif

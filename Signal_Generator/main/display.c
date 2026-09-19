@@ -1,5 +1,6 @@
 #include "display.h"
 #include "generator.h"
+#include "waveform.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <stdio.h>
@@ -10,41 +11,18 @@ static const char *TAG = "DISPLAY";
 static u8g2_t u8g2;
 
 
-static const char *hub_names_standby[] = {
-
-    "Parametros",
-    "Funcion",
-    "RUN"
-
-};
-
-
-static const char *hub_names_generating[] = {
-
-    "Parametros",
-    "Funcion",
-    "STOP"
-
-};
-
-
 static const char *param_names[] = {
 
-    "Frequency",
-    "Amplitude",
+    "Frecuencia",
+    "Amplitud",
     "Offset",
     "Duty"
 
 };
 
+static char hub_func_row[24];
 
-static const char *func_names[] = {
-
-    "Seno",
-    "Cuadrada",
-    "Triangular"
-
-};
+static i2c_cmd_handle_t oled_txn = NULL;
 
 static uint8_t oled_i2c_byte(
     u8x8_t *u8x8,
@@ -57,45 +35,50 @@ static uint8_t oled_i2c_byte(
 
     switch (msg) {
 
+        case U8X8_MSG_BYTE_START_TRANSFER:
+
+            oled_txn = i2c_cmd_link_create();
+
+            i2c_master_start(oled_txn);
+
+            i2c_master_write_byte(
+                oled_txn,
+                (OLED_ADDR << 1) | I2C_MASTER_WRITE,
+                true
+            );
+
+            break;
+
         case U8X8_MSG_BYTE_SEND:
-        {
-            uint8_t *data =
-                (uint8_t *)arg_ptr;
-
-            i2c_cmd_handle_t cmd =
-                i2c_cmd_link_create();
-
-            i2c_master_start(cmd);
-
-            i2c_master_write_byte(
-                cmd,
-                (OLED_ADDR << 1) |
-                    I2C_MASTER_WRITE,
-                true
-            );
-
-            i2c_master_write_byte(
-                cmd,
-                0x40,
-                true
-            );
 
             i2c_master_write(
-                cmd,
-                data,
+                oled_txn,
+                (uint8_t *)arg_ptr,
                 arg_int,
                 true
             );
 
-            i2c_master_stop(cmd);
+            break;
 
-            i2c_master_cmd_begin(
+        case U8X8_MSG_BYTE_END_TRANSFER:
+        {
+            i2c_master_stop(oled_txn);
+
+            esp_err_t ret = i2c_master_cmd_begin(
                 I2C_NUM_0,
-                cmd,
+                oled_txn,
                 1000 / portTICK_PERIOD_MS
             );
 
-            i2c_cmd_link_delete(cmd);
+            i2c_cmd_link_delete(oled_txn);
+            oled_txn = NULL;
+
+            if (ret != ESP_OK) {
+
+                ESP_LOGE(TAG,
+                         "I2C transfer FAILED: err=%s (%d)",
+                         esp_err_to_name(ret), (int)ret);
+            }
 
             break;
         }
@@ -106,6 +89,7 @@ static uint8_t oled_i2c_byte(
 
     return 1;
 }
+
 
 static uint8_t u8x8_gpio_and_delay(
     u8x8_t *u8x8,
@@ -133,6 +117,7 @@ static uint8_t u8x8_gpio_and_delay(
 
     return 1;
 }
+
 
 void display_init(void)
 {
@@ -194,7 +179,8 @@ static void draw_menu(
     const char *title,
     const char **items,
     int count,
-    int selected
+    int selected,
+    int active
 )
 {
     u8g2_ClearBuffer(&u8g2);
@@ -224,16 +210,17 @@ static void draw_menu(
 
         int y = 24 + i * 10;
 
-        u8g2_DrawStr(
-            &u8g2,
-            0,
-            y,
-            (i == selected) ? ">" : " "
-        );
+        if (i == selected) {
+            u8g2_DrawStr(&u8g2, 0, y, ">");
+        }
+
+        if (i == active) {
+            u8g2_DrawStr(&u8g2, 6, y, "*");
+        }
 
         u8g2_DrawStr(
             &u8g2,
-            12,
+            14,
             y,
             items[i]
         );
@@ -243,27 +230,31 @@ static void draw_menu(
     u8g2_SendBuffer(&u8g2);
 }
 
-static void draw_hub_menu(int selected, int generating)
+
+static void draw_hub_menu(int selected, int generating, int wave_type)
 {
-    if (generating) {
+    snprintf(
+        hub_func_row,
+        sizeof(hub_func_row),
+        "Funcion: %s",
+        waveform_get_name((wave_t)wave_type)
+    );
 
-        draw_menu(
-            "Generando...",
-            hub_names_generating,
-            3,
-            selected
-        );
+    const char *items[3];
 
-    } else {
+    items[0] = "Parametros";
+    items[1] = hub_func_row;
+    items[2] = generating ? "STOP" : "RUN";
 
-        draw_menu(
-            "Standby",
-            hub_names_standby,
-            3,
-            selected
-        );
-    }
+    draw_menu(
+        generating ? "Generando..." : "Standby",
+        items,
+        3,
+        selected,
+        -1
+    );
 }
+
 
 static void draw_param(
     int index,
@@ -372,13 +363,15 @@ static void draw_param(
     u8g2_SendBuffer(&u8g2);
 }
 
+
 void display_update(
     int state,
     int index,
     float freq,
     float amp,
     float offset,
-    float duty
+    float duty,
+    int wave_type
 )
 {
     ESP_LOGD(TAG, "Redraw: state=%d index=%d", state, index);
@@ -387,13 +380,13 @@ void display_update(
 
         case STATE_STANDBY:
 
-            draw_hub_menu(index, 0);
+            draw_hub_menu(index, 0, wave_type);
 
             break;
 
         case STATE_GENERATING:
 
-            draw_hub_menu(index, 1);
+            draw_hub_menu(index, 1, wave_type);
 
             break;
 
@@ -402,8 +395,9 @@ void display_update(
             draw_menu(
                 "Parametros",
                 param_names,
-                4,
-                index
+                PARAM_COUNT,
+                index,
+                -1
             );
 
             break;
@@ -421,15 +415,23 @@ void display_update(
             break;
 
         case STATE_SELECT_FUNC:
+        {
+            const char *func_names[FUNCTION_COUNT];
+
+            for (int i = 0; i < FUNCTION_COUNT; i++) {
+                func_names[i] = waveform_get_name((wave_t)i);
+            }
 
             draw_menu(
                 "Funciones",
                 func_names,
-                3,
-                index
+                FUNCTION_COUNT,
+                index,
+                wave_type
             );
 
             break;
+        }
 
         default:
             break;

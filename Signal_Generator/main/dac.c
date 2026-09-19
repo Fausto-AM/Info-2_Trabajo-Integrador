@@ -2,6 +2,7 @@
 #include "config.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "driver/dac_oneshot.h"
 
 static const char *TAG = "DAC";
 
@@ -10,7 +11,7 @@ static dac_oneshot_handle_t dac_handle;
 void dac_init(void)
 {
     dac_oneshot_config_t dac_config = {
-        .chan_id = DAC_CHAN_1,
+        .chan_id = DAC_CHAN_0,
     };
 
     ESP_ERROR_CHECK(

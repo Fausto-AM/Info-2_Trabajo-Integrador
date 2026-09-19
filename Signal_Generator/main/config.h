@@ -9,7 +9,7 @@
 #define PIN_DAC       25
 #define PIN_ENC_A     27
 #define PIN_ENC_B     14
-#define PIN_ENC_BTTN  12
+#define PIN_ENC_BTTN  32
 
 
 // OLED Display parameters
@@ -38,6 +38,6 @@
 #define DAC_MAX_VALUE 255
 #define BUTTON_LONG_PRESS_MS 500
 #define BUTTON_DEBOUNCE_MS   25
-#define ENCODER_DEBOUNCE_US  1500
+#define ENCODER_STEPS_PER_DETENT  2
 
 #endif

@@ -23,7 +23,7 @@ typedef struct {
 } param_t;
 
 #define PARAM_COUNT     4
-#define FUNCTION_COUNT  3
+#define FUNCTION_COUNT  4
 
 void generator_init(void);
 void generator_process_event(encoder_t event);

@@ -21,7 +21,8 @@ void init_all(void)
         freq,
         amp,
         offset,
-        duty
+        duty,
+        (int)waveform_get_type()
     );
 
     ESP_LOGI(TAG, "init_all: done");
@@ -45,6 +46,7 @@ void system_process(void)
         freq,
         amp,
         offset,
-        duty
+        duty,
+        (int)waveform_get_type()
     );
 }

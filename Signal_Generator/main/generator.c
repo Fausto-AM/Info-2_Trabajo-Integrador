@@ -162,7 +162,7 @@ static void function_next(void)
         func_idx = 0;
     }
 
-    ESP_LOGI(TAG, "Function cursor -> idx %d", func_idx);
+    ESP_LOGI(TAG, "Function cursor -> %s", waveform_get_name((wave_t)func_idx));
 }
 
 static void function_previous(void)
@@ -173,14 +173,14 @@ static void function_previous(void)
         func_idx--;
     }
 
-    ESP_LOGI(TAG, "Function cursor -> idx %d", func_idx);
+    ESP_LOGI(TAG, "Function cursor -> %s", waveform_get_name((wave_t)func_idx));
 }
 
 static void function_select(void)
 {
     waveform_set_type((wave_t)func_idx);
 
-    ESP_LOGI(TAG, "Function applied: idx %d", func_idx);
+    ESP_LOGI(TAG, "Function applied: %s", waveform_get_name((wave_t)func_idx));
 }
 
 static void hub_commit(void)
