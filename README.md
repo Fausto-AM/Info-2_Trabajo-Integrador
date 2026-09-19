@@ -32,7 +32,7 @@ Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`ge
 
 - **`STATE_EDIT_PARAM`** — al girar el encoder se incrementa o decrementa el parámetro seleccionado según su tamaño de paso, respetando sus límites mínimo y máximo. Tanto una pulsación corta como una larga regresan a `STATE_SELECT_PARAM`.
 
-- **`STATE_SELECT_FUNC`** — lista desplazable de formas de onda (Seno, Cuadrada, Triangular). Una pulsación corta aplica inmediatamente la forma de onda seleccionada (y permanece en este estado, por lo que se pueden previsualizar varias consecutivamente); una pulsación larga sale y vuelve al estado desde el que se ingresó.
+- **`STATE_SELECT_FUNC`** — lista desplazable de formas de onda (Seno, Cuadrada, Triangular, Sierra). Una pulsación corta aplica inmediatamente la forma de onda seleccionada (y permanece en este estado, por lo que se pueden previsualizar varias consecutivamente); una pulsación larga sale y vuelve al estado desde el que se ingresó.
 
 `STATE_SELECT_PARAM` y `STATE_SELECT_FUNC` pueden alcanzarse tanto desde `STATE_STANDBY` como desde `STATE_GENERATING`, y una variable `return_state` recuerda desde cuál de los dos estados se ingresó. De esta manera se pueden modificar la frecuencia, amplitud, offset, duty o forma de onda **mientras la señal se está generando activamente**, sin necesidad de detenerla primero.
 
@@ -40,15 +40,15 @@ Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`ge
 
 | Archivo | Responsabilidad |
 |---|---|
-| `main.c` | `app_main`: Inicialización y luego un bucle de polling de 1 ms que lee los eventos del encoder, alimenta la FSM y actualiza la pantalla únicamente cuando hubo algún cambio. |
+| `main.c` | `app_main`: Inicialización y luego un bucle de _polling_ de 1 ms que lee los eventos del encoder, alimenta la FSM y actualiza la pantalla únicamente cuando hubo algún cambio. |
 | `generator.c` / `.h` | La FSM descrita anteriormente. Se encarga de todo el estado de la interfaz, de los valores actuales de los parámetros (mediante `waveform_set_*`) y de la bandera de ejecución/parada. |
-| `encoder.c` / `.h` | Lee el encoder rotatorio y el botón. Produce los cuatro eventos `encoder_t`. |
-| `display.c` / `.h` | Renderiza cada estado de la FSM en la OLED mediante u8g2. Es puramente una función de `(state, index, freq, amp, offset, duty)`, sin mantener estado propio. |
-| `waveform.c` / `.h` | Contiene las LUTs (_Look-up Tables_) para seno/cuadrada/triangular y el acumulador de fase; `waveform_get_sample()` se llama una vez por cada muestra de salida. |
+| `encoder.c` / `.h` | Lee el encoder rotatorio y el botón. Produce los cuatro eventos de `encoder_t`. |
+| `display.c` / `.h` | Renderiza cada estado de la FSM en la OLED mediante u8g2. |
+| `waveform.c` / `.h` | Contiene las LUTs (_Look-up Tables_) para seno/cuadrada/triangular/sierra y el acumulador de fase; `waveform_get_sample()` se llama una vez por cada muestra de salida. |
 | `dac.c` / `.h` | Un _wrapper_ sobre el driver `dac_oneshot` de ESP-IDF. |
-| `sample_timer.c` / `.h` | Un callback periódico de `esp_timer` a `SAMPLE_RATE` (10kHz) que obtiene una muestra de `waveform.c` y la envía a `dac.c`, habilitado según `generator_is_running()`. |
+| `sample_timer.c` / `.h` | Un callback periódico de `esp_timer` a `SAMPLE_RATE` (40kHz) que obtiene una muestra de `waveform.c` y la envía a `dac.c`, habilitado según `generator_is_running()`. |
 | `sys.c` / `.h` | `init_all()` — inicializa todos los módulos en orden. |
-| `config.h` | Todos los números de GPIO, los límites eléctricos (frecuencia mínima/máxima, amplitud, etc.) y las dos constantes de antirrebote. |
+| `config.h` | Todos los números de GPIO, los límites eléctricos (frecuencia mínima/máxima, amplitud, etc.), etc. |
 
 ### Diagrama de la Máquina de Estado
 
