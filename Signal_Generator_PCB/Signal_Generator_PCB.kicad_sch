@@ -7,7 +7,7 @@
 	(title_block
 		(title "ESP32 SIgnal Generator")
 		(date "2026-09")
-		(rev "v02")
+		(rev "v03")
 		(company "UTNFRA")
 		(comment 1 "Alvarez Mollo, Fausto")
 		(comment 2 "Informática II")
@@ -2196,6 +2196,16 @@
 		)
 		(uuid "1f87f627-1e31-49d9-8171-4fa9c06ac80a")
 	)
+	(text "SDA"
+		(exclude_from_sim no)
+		(at 127.254 70.358 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "3b20c221-d702-4bb9-a291-702bc6e29b01")
+	)
 	(text "CLK"
 		(exclude_from_sim no)
 		(at 113.284 33.782 0)
@@ -2225,6 +2235,16 @@
 			)
 		)
 		(uuid "8df35604-969b-4708-9e38-f2bb3f4bdeeb")
+	)
+	(text "SCL"
+		(exclude_from_sim no)
+		(at 127.254 72.898 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "99c78191-2555-42f6-91e6-1cc627994b78")
 	)
 	(text "Rotary Encoder with Switch"
 		(exclude_from_sim no)
@@ -2275,6 +2295,10 @@
 		(uuid "e330e0db-3648-4951-866a-127054b213c3")
 	)
 	(no_connect
+		(at 92.71 91.44)
+		(uuid "0bb5756b-bebb-4611-ac74-635ded110404")
+	)
+	(no_connect
 		(at 26.67 63.5)
 		(uuid "0cb71c6c-c447-44e3-a140-e5960935a153")
 	)
@@ -2315,6 +2339,10 @@
 		(uuid "43bd048e-5dd7-4a6a-a9a5-373d6658548d")
 	)
 	(no_connect
+		(at 92.71 63.5)
+		(uuid "48a40e9d-08c9-4814-a749-f752f14e5a3f")
+	)
+	(no_connect
 		(at 92.71 78.74)
 		(uuid "4ea47e3d-6320-4ad1-bc9c-de01df3505a5")
 	)
@@ -2325,14 +2353,6 @@
 	(no_connect
 		(at 26.67 30.48)
 		(uuid "5f35ad82-b14c-4bc5-9010-e02a6c4c92ad")
-	)
-	(no_connect
-		(at 92.71 63.5)
-		(uuid "61bede5d-3a46-4b06-8e0c-7d2aa756f2eb")
-	)
-	(no_connect
-		(at 26.67 35.56)
-		(uuid "68949114-a6fa-4364-b458-f41206d8197e")
 	)
 	(no_connect
 		(at 26.67 55.88)
@@ -2361,6 +2381,10 @@
 	(no_connect
 		(at 92.71 33.02)
 		(uuid "bf3eed6a-1a96-48ec-b8be-c485ef78b87f")
+	)
+	(no_connect
+		(at 26.67 43.18)
+		(uuid "d89d83d4-5199-4ba3-ba24-655cc17bcf44")
 	)
 	(no_connect
 		(at 92.71 73.66)
@@ -2397,6 +2421,16 @@
 			(type default)
 		)
 		(uuid "15e69b0a-784d-4812-80bb-acdafd8f16ba")
+	)
+	(wire
+		(pts
+			(xy 24.13 35.56) (xy 26.67 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1d40cb4a-5339-4a7f-93ef-b30c9731883e")
 	)
 	(wire
 		(pts
@@ -2537,16 +2571,6 @@
 			(type default)
 		)
 		(uuid "670fcd31-ad8a-4255-8d97-5b77ff9ebdbe")
-	)
-	(wire
-		(pts
-			(xy 24.13 43.18) (xy 26.67 43.18)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6cba4997-f08f-47f1-b07e-1aa50180c7ce")
 	)
 	(wire
 		(pts
@@ -2892,7 +2916,7 @@
 			)
 		)
 	)
-	(label "GPIO12"
+	(label "GPIO32"
 		(at 149.86 36.83 0)
 		(fields_autoplaced yes)
 		(effects
@@ -2915,8 +2939,8 @@
 			)
 		)
 	)
-	(label "GPIO12"
-		(at 24.13 43.18 180)
+	(label "GPIO32"
+		(at 24.13 35.56 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2924,9 +2948,9 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ac7c021e-c42f-4bb0-8c46-5b23ce46d0e0")
+		(uuid "8760d379-dc32-4ca3-9e8a-6fe500dcc5da")
 		(property "GPIO" ""
-			(at 24.13 44.45 0)
+			(at 24.13 36.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
