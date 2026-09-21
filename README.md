@@ -3,52 +3,130 @@
 Repositorio personal para la entrega del Trabajo Práctico Integrador de Informática II para la UTNFRA.
 
 ## Profesores
+
 - Ing. Gustavo Viard.
 - Mg. Ing. Damian Ruben Corbalan.
 
 ## Generador de Funciones con ESP32
 
 ### Resumen
-El objetivo de este proyecto consiste en el diseño y la implementación de un generador de funciones digital basado en el microcontrolador ESP32-WROOM. El sistema, le permite al usuario configurar y seleccionar varios parámetros de la función a generar mediante un encoder rotativo y la visualización de los mismos mediante una pantalla.
+
+El proyecto consiste en el diseño e implementación de un generador de funciones digital basado en un microcontrolador ESP32-WROOM.
+
+El sistema permite seleccionar la forma de onda y modificar sus principales parámetros mediante un único encoder rotativo con pulsador. La información correspondiente al estado del generador, la función seleccionada y los parámetros configurables se presenta en una pantalla OLED SSD1306 de 128 × 64 píxeles.
+
+La señal de salida es generada digitalmente mediante tablas de consulta (_Look-Up Tables_ [LUT]) y posteriormente convertida a una señal analógica mediante el DAC interno del ESP32. La generación de muestras se realiza a una frecuencia de muestreo de 40 kHz.
+
+El firmware se encuentra organizado en módulos independientes y utiliza una máquina de estados finitos para gestionar la interfaz de usuario y los diferentes modos de operación del generador.
 
 ### Objetivos
-- Implementar un generador de funciones que ofrezca, múltiples formas de onda seleccionables.
-- Permitir la edición de parámetros relevantes de la señal generada según la función seleccionada.
-- Proporcionar una interfaz de control sencilla e intuitiva basada en un único encoder rotativo con pulsador, que facilite la navegación por los menús y el ajuste de valores.
-- Diseñar una visualización clara en una pantalla que muestre el estado actual, los parámetros y las opciones disponibles.
-- Estructurar el firmware mediante una máquina de estados finitos que gestione de forma robusta las transiciones entre los distintos modos de operación.
 
-### Diseño de la FSM.
+- Implementar un generador de funciones digital utilizando el DAC interno del ESP32.
+- Generar diferentes formas de onda: seno, cuadrada, triangular y sierra.
+- Permitir la modificación de frecuencia, amplitud, offset y ciclo de trabajo.
+- Permitir la modificación de los parámetros mientras la señal se encuentra siendo generada.
+- Implementar una interfaz de usuario utilizando únicamente un encoder rotativo con pulsador.
+- Visualizar el estado del sistema y los parámetros configurables mediante una pantalla OLED.
+- Implementar una máquina de estados finitos que gestione la navegación y las acciones del usuario.
+- Separar las diferentes funciones del firmware en módulos independientes.
+- Generar las muestras de salida mediante una frecuencia de muestreo fija de 40 kHz.
 
-Toda la interfaz de usuario es una única máquina de estados finitos (FSM) (`generator.c` / `generator.h`), controlada mediante cuatro posibles entradas provenientes del encoder (`encoder.c`): `ENC_CW`, `ENC_CCW`, `ENC_SHORT_PRESS`, `ENC_LONG_PRESS`.
+### Diseño de la FSM
 
-- **`STATE_INIT`**: solo existe durante un instante en el arranque; pasa inmediatamente a `STATE_STANDBY` de forma incondicional.
+La interfaz de usuario se implementa mediante una máquina de estados finitos (FSM) contenida en `generator.c` y `generator.h`.
 
-- **`STATE_STANDBY`**: la señal **no** se está generando. Al girar el encoder se mueve un cursor de selección sobre tres opciones: **Parámetros**, **Función**, **Run**. Una pulsación corta confirma la opción seleccionada.
+Los eventos producidos por el encoder son:
 
-- **`STATE_GENERATING`**: la señal **se está** generando (el DAC está activo). Se mantiene el mismo cursor de tres opciones, excepto que la tercera opción pasa a ser **Stop** en lugar de **Run**.
+- `ENC_CW`: giro horario.
+- `ENC_CCW`: giro antihorario.
+- `ENC_SHORT_PRESS`: pulsación corta.
+- `ENC_LONG_PRESS`: pulsación larga.
 
-- **`STATE_SELECT_PARAM`**: lista desplazable con los cuatro parámetros (Frecuencia, Amplitud, Offset, Duty). Una pulsación corta entra en `STATE_EDIT_PARAM` sobre el parámetro seleccionado; una pulsación larga sale y vuelve al estado desde el que se ingresó.
+#### Estados
 
-- **`STATE_EDIT_PARAM`** — al girar el encoder se incrementa o decrementa el parámetro seleccionado según su tamaño de paso, respetando sus límites mínimo y máximo. Tanto una pulsación corta como una larga regresan a `STATE_SELECT_PARAM`.
+- `STATE_STANDBY`
 
-- **`STATE_SELECT_FUNC`** — lista desplazable de formas de onda (Seno, Cuadrada, Triangular, Sierra). Una pulsación corta aplica inmediatamente la forma de onda seleccionada (y permanece en este estado, por lo que se pueden previsualizar varias consecutivamente); una pulsación larga sale y vuelve al estado desde el que se ingresó.
+    Es el estado inicial de operación del generador.
 
-`STATE_SELECT_PARAM` y `STATE_SELECT_FUNC` pueden alcanzarse tanto desde `STATE_STANDBY` como desde `STATE_GENERATING`, y una variable `return_state` recuerda desde cuál de los dos estados se ingresó. De esta manera se pueden modificar la frecuencia, amplitud, offset, duty o forma de onda **mientras la señal se está generando activamente**, sin necesidad de detenerla primero.
+    La salida se encuentra detenida y el usuario puede desplazarse mediante el encoder entre las siguientes opciones:
+
+    * Parámetros
+    * Función
+    * RUN
+
+    Una pulsación corta confirma la opción seleccionada.
+
+    Al seleccionar _RUN_, el sistema pasa a `STATE_GENERATING`.
+
+- `STATE_GENERATING`
+
+    En este estado el generador se encuentra funcionando y el DAC recibe las muestras generadas.
+
+    El menú principal pasa a mostrar:
+
+    * Parámetros
+    * Función
+    * STOP
+
+    Desde este estado también es posible ingresar a los menús de parámetros y selección de función sin detener la generación de la señal.
+
+    Al seleccionar _STOP_, el sistema vuelve a `STATE_STANDBY`.
+
+- `STATE_SELECT_PARAM`
+
+    Permite seleccionar uno de los cuatro parámetros configurables:
+
+    * Frecuencia
+    * Amplitud
+    * Offset
+    * Duty
+
+    Una pulsación corta sobre un parámetro lleva a `STATE_EDIT_PARAM`.
+
+    Una pulsación larga abandona el menú y retorna al estado desde el cual se ingresó.
+
+- `STATE_EDIT_PARAM`
+
+    Permite modificar el parámetro seleccionado mediante el giro del encoder.
+
+    Cada parámetro posee:
+
+    * un valor actual;
+    * un límite mínimo;
+    * un límite máximo;
+    * un tamaño de paso;
+    * una función setter encargada de aplicar el nuevo valor.
+
+    Los valores se limitan automáticamente a los rangos definidos en config.h.
+
+    Una pulsación corta o larga finaliza la edición y retorna a `STATE_SELECT_PARAM`.
+
+- `STATE_SELECT_FUNC`
+
+    Permite seleccionar la forma de onda utilizada por el generador:
+
+    * Seno
+    * Cuadrada
+    * Triangular
+    * Sierra
+
+    Una pulsación corta aplica inmediatamente la función seleccionada. Esto permite recorrer las diferentes formas de onda y observar el cambio sin abandonar el menú.
+
+    Una pulsación larga retorna al estado desde el cual se ingresó.
 
 ### Descripción de archivos
 
 | Archivo | Responsabilidad |
 |---|---|
-| `main.c` | `app_main`: Inicialización y luego un bucle de _polling_ de 1 ms que lee los eventos del encoder, alimenta la FSM y actualiza la pantalla únicamente cuando hubo algún cambio. |
-| `generator.c` / `.h` | La FSM descrita anteriormente. Se encarga de todo el estado de la interfaz, de los valores actuales de los parámetros (mediante `waveform_set_*`) y de la bandera de ejecución/parada. |
-| `encoder.c` / `.h` | Lee el encoder rotatorio y el botón. Produce los cuatro eventos de `encoder_t`. |
-| `display.c` / `.h` | Renderiza cada estado de la FSM en la OLED mediante u8g2. |
-| `waveform.c` / `.h` | Contiene las LUTs (_Look-up Tables_) para seno/cuadrada/triangular/sierra y el acumulador de fase; `waveform_get_sample()` se llama una vez por cada muestra de salida. |
-| `dac.c` / `.h` | Un _wrapper_ sobre el driver `dac_oneshot` de ESP-IDF. |
-| `sample_timer.c` / `.h` | Un callback periódico de `esp_timer` a `SAMPLE_RATE` (40kHz) que obtiene una muestra de `waveform.c` y la envía a `dac.c`, habilitado según `generator_is_running()`. |
-| `sys.c` / `.h` | `init_all()` — inicializa todos los módulos en orden. |
-| `config.h` | Todos los números de GPIO, los límites eléctricos (frecuencia mínima/máxima, amplitud, etc.), etc. |
+| main.c | Punto de entrada de la aplicación. Inicializa el sistema y ejecuta el bucle principal de _polling_.
+| sys.c/.h | Inicialización general de los módulos y procesamiento de eventos del sistema.
+| generator.c/.h | Implementación de la máquina de estados, navegación de menús, selección de parámetros y control `RUN/STOP`.
+| encoder.c/.h | Lectura del encoder y del pulsador. Genera los eventos utilizados por la FSM.
+| display.c/.h | Control y actualización de la pantalla OLED mediante u8g2 e I2C.
+| waveform.c/.h | Generación de las LUT, selección de formas de onda, acumulador de fase y cálculo de muestras.
+| dac.c/.h | Abstracción del DAC interno del ESP32 mediante dac_oneshot.
+| sample_timer.c/.h | Temporización de la generación de muestras mediante `esp_timer`.
+| config.h | Configuración de GPIO, límites de parámetros, frecuencia de muestreo y constantes del sistema.
 
 ### Diagrama de la Máquina de Estado
 
