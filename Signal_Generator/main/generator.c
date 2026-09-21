@@ -1,16 +1,9 @@
 #include "generator.h"
 #include "config.h"
 #include "waveform.h"
-
 #include "esp_log.h"
 
 static const char *TAG = "GENERATOR";
-
-#define HUB_PARAM   0
-#define HUB_FUNC    1
-#define HUB_RUN     2
-
-#define HUB_COUNT   3
 
 static const char *hub_names[HUB_COUNT] = {
     "Parametros",
@@ -132,8 +125,7 @@ static void param_increase(void)
 
     params[param_idx].setter(value);
 
-    ESP_LOGI(TAG, "%s += %.3f -> %.3f", params[param_idx].name,
-             params[param_idx].step, *params[param_idx].value);
+    ESP_LOGI(TAG, "%s += %.3f -> %.3f", params[param_idx].name, params[param_idx].step, *params[param_idx].value);
 }
 
 static void param_decrease(void)
@@ -150,8 +142,7 @@ static void param_decrease(void)
 
     params[param_idx].setter(value);
 
-    ESP_LOGI(TAG, "%s -= %.3f -> %.3f", params[param_idx].name,
-             params[param_idx].step, *params[param_idx].value);
+    ESP_LOGI(TAG, "%s -= %.3f -> %.3f", params[param_idx].name, params[param_idx].step, *params[param_idx].value);
 }
 
 static void function_next(void)
@@ -190,15 +181,13 @@ static void hub_commit(void)
         case HUB_PARAM:
             return_state = state;
             state = STATE_SELECT_PARAM;
-            ESP_LOGI(TAG, "Enter SELECT_PARAM (return to %s)",
-                     state_names[return_state]);
+            ESP_LOGI(TAG, "Enter SELECT_PARAM (return to %s)", state_names[return_state]);
             break;
 
         case HUB_FUNC:
             return_state = state;
             state = STATE_SELECT_FUNC;
-            ESP_LOGI(TAG, "Enter SELECT_FUNC (return to %s)",
-                     state_names[return_state]);
+            ESP_LOGI(TAG, "Enter SELECT_FUNC (return to %s)", state_names[return_state]);
             break;
 
         case HUB_RUN:
@@ -261,7 +250,6 @@ void generator_process_event(encoder_t event)
 
             break;
 
-
         case STATE_SELECT_PARAM:
 
             if (event == ENC_CW) {
@@ -274,18 +262,15 @@ void generator_process_event(encoder_t event)
 
             else if (event == ENC_SHORT_PRESS) {
                 state = STATE_EDIT_PARAM;
-                ESP_LOGI(TAG, "Enter EDIT_PARAM (%s)",
-                         params[param_idx].name);
+                ESP_LOGI(TAG, "Enter EDIT_PARAM (%s)", params[param_idx].name);
             }
 
             else if (event == ENC_LONG_PRESS) {
-                ESP_LOGI(TAG, "Exit SELECT_PARAM -> %s",
-                         state_names[return_state]);
+                ESP_LOGI(TAG, "Exit SELECT_PARAM -> %s", state_names[return_state]);
                 state = return_state;
             }
 
             break;
-
 
         case STATE_EDIT_PARAM:
 
@@ -297,14 +282,12 @@ void generator_process_event(encoder_t event)
                 param_decrease();
             }
 
-            else if (event == ENC_SHORT_PRESS ||
-                     event == ENC_LONG_PRESS) {
+            else if (event == ENC_SHORT_PRESS || event == ENC_LONG_PRESS) {
                 ESP_LOGI(TAG, "Exit EDIT_PARAM -> SELECT_PARAM");
                 state = STATE_SELECT_PARAM;
             }
 
             break;
-
 
         case STATE_SELECT_FUNC:
 
@@ -321,8 +304,7 @@ void generator_process_event(encoder_t event)
             }
 
             else if (event == ENC_LONG_PRESS) {
-                ESP_LOGI(TAG, "Exit SELECT_FUNC -> %s",
-                         state_names[return_state]);
+                ESP_LOGI(TAG, "Exit SELECT_FUNC -> %s", state_names[return_state]);
                 state = return_state;
             }
 
@@ -337,7 +319,6 @@ state_t generator_get_state(void)
 {
     return state;
 }
-
 
 int generator_get_index(void)
 {
@@ -363,7 +344,6 @@ int generator_is_running(void)
 {
     return generator_running;
 }
-
 
 float generator_get_sample(void)
 {

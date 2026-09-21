@@ -7,14 +7,6 @@
 
 void display_init(void);
 
-void display_update(
-    int state,
-    int index,
-    float freq,
-    float amp,
-    float offset,
-    float duty,
-    int wave_type
-);
+void display_update(int state, int index, float freq, float amp, float offset, float duty, int wave_type);
 
 #endif

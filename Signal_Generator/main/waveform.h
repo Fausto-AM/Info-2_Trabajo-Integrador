@@ -9,7 +9,6 @@
 #define PHASE_SHIFT     24
 
 typedef enum {
-
     WAVE_SINE,
     WAVE_SQUARE,
     WAVE_TRIANGLE,
@@ -17,12 +16,10 @@ typedef enum {
 
 } wave_t;
 
-
 extern float freq;
 extern float amp;
 extern float offset;
 extern float duty;
-
 
 void gen_sine(void);
 void gen_square(void);
@@ -43,6 +40,5 @@ float waveform_get_sample(void);
 wave_t waveform_get_type(void);
 
 const char *waveform_get_name(wave_t type);
-
 
 #endif

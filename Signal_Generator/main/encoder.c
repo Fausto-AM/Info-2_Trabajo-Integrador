@@ -1,17 +1,14 @@
 #include "encoder.h"
-
 #include "esp_timer.h"
 #include "esp_log.h"
 
 static const char *TAG = "ENCODER";
-
 
 static volatile int enc_count = 0;
 
 static volatile uint8_t last_ab_state = 0;
 
 static int last_count = 0;
-
 
 static uint64_t btn_press_start = 0;
 
@@ -41,14 +38,11 @@ void IRAM_ATTR encoder_isr(void *arg)
     last_ab_state = new_state;
 }
 
-
 void encoder_init(void)
 {
     gpio_config_t encoder_config = {
 
-        .pin_bit_mask =
-            (1ULL << PIN_ENC_A) |
-            (1ULL << PIN_ENC_B),
+        .pin_bit_mask = (1ULL << PIN_ENC_A) | (1ULL << PIN_ENC_B),
 
         .mode = GPIO_MODE_INPUT,
 
@@ -59,13 +53,7 @@ void encoder_init(void)
         .intr_type = GPIO_INTR_DISABLE
     };
 
-
-    ESP_ERROR_CHECK(
-        gpio_config(
-            &encoder_config
-        )
-    );
-
+    ESP_ERROR_CHECK(gpio_config(&encoder_config));
 
     gpio_config_t button_config = {
 
@@ -81,66 +69,28 @@ void encoder_init(void)
         .intr_type = GPIO_INTR_DISABLE
     };
 
+    ESP_ERROR_CHECK(gpio_config(&button_config));
 
-    ESP_ERROR_CHECK(
-        gpio_config(
-            &button_config
-        )
-    );
+    ESP_ERROR_CHECK(gpio_set_intr_type(PIN_ENC_A, GPIO_INTR_ANYEDGE));
 
+    ESP_ERROR_CHECK(gpio_set_intr_type(PIN_ENC_B, GPIO_INTR_ANYEDGE));
 
-    ESP_ERROR_CHECK(
-        gpio_set_intr_type(
-            PIN_ENC_A,
-            GPIO_INTR_ANYEDGE
-        )
-    );
+    ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
-    ESP_ERROR_CHECK(
-        gpio_set_intr_type(
-            PIN_ENC_B,
-            GPIO_INTR_ANYEDGE
-        )
-    );
+    ESP_ERROR_CHECK(gpio_isr_handler_add(PIN_ENC_A, encoder_isr, NULL));
 
+    ESP_ERROR_CHECK(gpio_isr_handler_add(PIN_ENC_B, encoder_isr, NULL));
 
-    ESP_ERROR_CHECK(
-        gpio_install_isr_service(0)
-    );
+    last_ab_state = ((uint8_t)gpio_get_level(PIN_ENC_A) << 1) | (uint8_t)gpio_get_level(PIN_ENC_B);
 
-
-    ESP_ERROR_CHECK(
-        gpio_isr_handler_add(
-            PIN_ENC_A,
-            encoder_isr,
-            NULL
-        )
-    );
-
-    ESP_ERROR_CHECK(
-        gpio_isr_handler_add(
-            PIN_ENC_B,
-            encoder_isr,
-            NULL
-        )
-    );
-
-    last_ab_state =
-        ((uint8_t)gpio_get_level(PIN_ENC_A) << 1) |
-        (uint8_t)gpio_get_level(PIN_ENC_B);
-
-    ESP_LOGI(TAG, "Encoder initialized (A=%d B=%d BTN=%d)",
-             PIN_ENC_A, PIN_ENC_B, PIN_ENC_BTTN);
+    ESP_LOGI(TAG, "Encoder initialized (A=%d B=%d BTN=%d)", PIN_ENC_A, PIN_ENC_B, PIN_ENC_BTTN);
 }
-
 
 encoder_t encoder_get_event(void)
 {
     encoder_t event = ENC_NONE;
 
-    uint64_t now_ms =
-        esp_timer_get_time() / 1000;
-
+    uint64_t now_ms = esp_timer_get_time() / 1000;
 
     int raw_pressed =
         (gpio_get_level(PIN_ENC_BTTN) == 0);
@@ -155,7 +105,6 @@ encoder_t encoder_get_event(void)
         ((now_ms - raw_change_ms) >= BUTTON_DEBOUNCE_MS)) {
 
         btn_pressed = raw_pressed;
-
 
         if (btn_pressed) {
 
@@ -176,11 +125,8 @@ encoder_t encoder_get_event(void)
                 event = ENC_SHORT_PRESS;
             }
 
-            ESP_LOGI(TAG, "Button event: %s (held %llu ms)",
-                     (event == ENC_LONG_PRESS) ? "LONG_PRESS" : "SHORT_PRESS",
-                     (unsigned long long)duration);
+            ESP_LOGI(TAG, "Button event: %s (held %llu ms)", (event == ENC_LONG_PRESS) ? "LONG_PRESS" : "SHORT_PRESS", (unsigned long long)duration);
         }
-
 
         return event;
     }
@@ -201,7 +147,6 @@ encoder_t encoder_get_event(void)
 
         ESP_LOGD(TAG, "Rotation event: CCW (count=%d)", enc_count);
     }
-
 
     return event;
 }

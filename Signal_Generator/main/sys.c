@@ -1,5 +1,4 @@
 #include "sys.h"
-
 #include "esp_log.h"
 
 static const char *TAG = "SYS";
@@ -15,15 +14,7 @@ void init_all(void)
     sample_timer_init();
     sample_timer_start();
 
-    display_update(
-        generator_get_state(),
-        generator_get_index(),
-        freq,
-        amp,
-        offset,
-        duty,
-        (int)waveform_get_type()
-    );
+    display_update(generator_get_state(), generator_get_index(), freq, amp, offset, duty, (int)waveform_get_type());
 
     ESP_LOGI(TAG, "init_all: done");
 }
@@ -40,13 +31,5 @@ void system_process(void)
 
     generator_process_event(event);
 
-    display_update(
-        generator_get_state(),
-        generator_get_index(),
-        freq,
-        amp,
-        offset,
-        duty,
-        (int)waveform_get_type()
-    );
+    display_update(generator_get_state(), generator_get_index(), freq, amp, offset, duty, (int)waveform_get_type());
 }

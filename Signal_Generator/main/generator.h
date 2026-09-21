@@ -12,7 +12,6 @@ typedef enum {
     STATE_SELECT_FUNC
 } state_t;
 
-
 typedef struct {
     const char *name;
     float *value;
@@ -24,6 +23,10 @@ typedef struct {
 
 #define PARAM_COUNT     4
 #define FUNCTION_COUNT  4
+#define HUB_PARAM   0
+#define HUB_FUNC    1
+#define HUB_RUN     2
+#define HUB_COUNT   3
 
 void generator_init(void);
 void generator_process_event(encoder_t event);
