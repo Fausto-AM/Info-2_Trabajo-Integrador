@@ -138,4 +138,8 @@ Los eventos producidos por el encoder son:
 
 ### PCB Finalizado
 
-![PCB](Assets/PCB)
+![PCB](Assets/PCB.png)
+
+### Proyecto Funcionando
+
+![Proyecto en Funcionamiento](Assets/Proyecto_en_Funcionamiento.mp4)
